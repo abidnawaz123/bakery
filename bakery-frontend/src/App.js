@@ -2,115 +2,121 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import axios from "axios";
+import { FaShoppingCart, FaFacebook, FaInstagram, FaEnvelope } from "react-icons/fa"; // More icons
 
 function App() {
-  // State to hold the data from the API
   const [bakeryItems, setBakeryItems] = useState([]);
-  // State for loading indicator
   const [loading, setLoading] = useState(true);
-  // State for error handling
   const [error, setError] = useState(null);
 
-  // Fetch bakery items from the API
   const fetchBakeryItems = () => {
     axios
       .get("http://127.0.0.1:8001/bakery/")
       .then((response) => {
-        setBakeryItems(response.data); // Set the data to state
-        setLoading(false); // Set loading to false after data is fetched
+        setBakeryItems(response.data);
+        setLoading(false);
       })
       .catch((err) => {
-        setError("An error occurred while fetching the data"); // Set error if request fails
-        setLoading(false); // Set loading to false if there is an error
+        setError("An error occurred while fetching the data");
+        setLoading(false);
       });
   };
 
-  // Poll the API every minute to check for updated data
-  
   useEffect(() => {
-    const fetchBakeryItems = () => {
-        axios
-            .get("http://127.0.0.1:8001/bakery/")
-            .then((response) => {
-                // Assuming response.data is an array of items
-                setBakeryItems(response.data); // Set active items
-                setLoading(false); // Set loading to false after data is fetched
-            })
-            .catch((err) => {
-                setError("An error occurred while fetching the data");
-                setLoading(false); 
-            });
-    };
-
-    fetchBakeryItems(); // Initial fetch
+    fetchBakeryItems();
     const intervalId = setInterval(() => {
-        fetchBakeryItems(); // Re-fetch every 5 seconds
-    }, 5000); // 5 seconds for testing (adjust as needed)
+      fetchBakeryItems();
+    }, 5000);
 
-    return () => clearInterval(intervalId); // Clean up on unmount
-}, []);
+    return () => clearInterval(intervalId);
+  }, []);
 
-
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="skeleton-loader large"></div>;
   if (error) return <div>{error}</div>;
 
-  const convertintoHumanReadableTime = (dateStr) => {
-
-    const date = new Date(dateStr);
-
-    // Options to format the date in a human-readable way
-    const options = {
-      weekday: "long", // e.g. "Monday"
-      year: "numeric", // e.g. "2024"
-      month: "long", // e.g. "December"
-      day: "numeric", // e.g. "21"
-      hour: "2-digit", // e.g. "04"
-      minute: "2-digit", // e.g. "15"
-      // second: "2-digit",
-    };
-
-    // Format the date
-    const humanReadableDate = date.toLocaleString("en-US", options);
-
-    return humanReadableDate;
-  };
-
   return (
-    <div>
-      <Container>
-        <h1 className="text-center my-4">Bakery Products</h1>
-        <Row>
-          {bakeryItems.map((product) => (
-            <Col
-              key={product.id}
-              md={3}
-              className="d-flex justify-content-center mb-4"
-            >
-              <Card style={{ width: "18rem" }}>
-                <Card.Img
-                  variant="top"
-                  src={`${product.item_image}`}
-                  alt={product.item_name}
-                  height={200}
-                />
-                <Card.Body>
-                  <Card.Title>{product.item_name}</Card.Title>
-                  <Card.Text>{product.item_description}</Card.Text>
-                  <Card.Text>
-                    <strong>{`$${product.item_price.toFixed(2)}`}</strong>
-                  </Card.Text>
-                  <Card.Text>
-                    <strong>Expires on: </strong>
-                    <p>{convertintoHumanReadableTime(product.expiry_date)}</p>
-                  </Card.Text>
+    <div className="website-container">
+      <header className="custom-header">
+        <div className="header-content">
+          <div className="logo">Our Sweet Bakery</div>
+          <nav className="main-nav">
+            <a href="#products">Products</a>
+            <a href="#about">About Us</a>
+            <a href="#contact">Contact</a>
+            {/* Add more navigation links */}
+          </nav>
+          <div className="header-actions">
+            {/* <button className="search-button">Search</button> */}
+            <button className="cart-icon-button">
+              <FaShoppingCart className="cart-icon" /> Cart (0)
+            </button>
+          </div>
+        </div>
+      </header>
 
-                  <Button variant="primary">Add to Cart</Button>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-      </Container>
+      <div className="background-container">
+        <Container>
+          <div className="content-container">
+            <h1>Delicious Bakery Products</h1>
+            <h2 className="subheading">Freshly Baked Goods Made with Love</h2>
+            <p className="introduction">
+              Welcome to our online bakery! We offer a delightful selection of handcrafted breads, pastries, and treats made with the finest ingredients. Browse our fresh items below and satisfy your cravings.
+            </p>
+            <div className="card-grid">
+              {bakeryItems.map((product) => (
+                <Card key={product.id} className="product-card">
+                  <div className="image-container">
+                    <Card.Img
+                      variant="top"
+                      src={product.item_image}
+                      alt={product.item_name}
+                      className="product-image"
+                    />
+                  </div>
+                  <Card.Body className="product-info">
+                    <Card.Title className="product-name">{product.item_name}</Card.Title>
+                    <Card.Text className="product-description">{product.item_description}</Card.Text>
+                    <Card.Text className="product-price">
+                      ${product.item_price.toFixed(2)}
+                    </Card.Text>
+                    <Card.Text className="product-expiry">
+                      Expires on: {new Date(product.expiry_date).toLocaleDateString()}
+                    </Card.Text>
+                    <Button className="add-to-cart-button">
+                      <FaShoppingCart className="cart-icon" /> Add to Cart
+                    </Button>
+                  </Card.Body>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </Container>
+      </div>
+
+      <footer className="custom-footer">
+        <div className="footer-content">
+          <div className="footer-section about">
+            <h3>About Our Bakery</h3>
+            <p>We are passionate about baking delicious, high-quality goods using traditional methods and the finest ingredients. Our goal is to bring joy to your day with every bite.</p>
+          </div>
+          <div className="footer-section contact">
+            <h3>Contact Us</h3>
+            <p><FaEnvelope /> info@ourbakery.com</p>
+            <p>123 Sweet Street, Bakery Town</p>
+          </div>
+          <div className="footer-section social">
+            <h3>Follow Us</h3>
+            <div className="social-icons">
+              <a href="#facebook" className="social-icon"><FaFacebook /></a>
+              <a href="#instagram" className="social-icon"><FaInstagram /></a>
+              {/* Add more social media icons */}
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; {new Date().getFullYear()} Our Sweet Bakery. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }
