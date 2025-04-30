@@ -14,7 +14,7 @@ function App() {
   // Fetch bakery items from the API
   const fetchBakeryItems = () => {
     axios
-      .get("http://127.0.0.1:8000/bakery/")
+      .get("http://127.0.0.1:8001/bakery/")
       .then((response) => {
         setBakeryItems(response.data); // Set the data to state
         setLoading(false); // Set loading to false after data is fetched
@@ -26,15 +26,30 @@ function App() {
   };
 
   // Poll the API every minute to check for updated data
+  
   useEffect(() => {
+    const fetchBakeryItems = () => {
+        axios
+            .get("http://127.0.0.1:8001/bakery/")
+            .then((response) => {
+                // Assuming response.data is an array of items
+                setBakeryItems(response.data); // Set active items
+                setLoading(false); // Set loading to false after data is fetched
+            })
+            .catch((err) => {
+                setError("An error occurred while fetching the data");
+                setLoading(false); 
+            });
+    };
+
     fetchBakeryItems(); // Initial fetch
     const intervalId = setInterval(() => {
-      fetchBakeryItems(); // Fetch bakery items every minute
-    }, 5000); // 60 seconds
+        fetchBakeryItems(); // Re-fetch every 5 seconds
+    }, 5000); // 5 seconds for testing (adjust as needed)
 
-    // Clean up the interval when the component is unmounted
-    return () => clearInterval(intervalId);
-  }, []); // Empty dependency array ensures this runs only once when the component mounts
+    return () => clearInterval(intervalId); // Clean up on unmount
+}, []);
+
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
