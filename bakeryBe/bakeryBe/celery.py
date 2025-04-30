@@ -10,21 +10,27 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bakeryBe.settings')
 
 app = Celery('bakeryBe')
 
-# Using a string here means the worker doesn't have to serialize
-# the configuration object to child processes.
-# - namespace='CELERY' means all celery-related config keys should have a `CELERY_` prefix.
+# Load task-related config from Django settings using CELERY_ namespace
 app.config_from_object('django.conf:settings', namespace='CELERY')
-
-# Configure periodic tasks
-app.conf.beat_schedule = {
-    'check_expired_items_every_minute': {
-        'task': 'products.tasks.remove_expired_bakery_items',  # Corrected task path
-        'schedule': crontab(minute='*/1'),  # Run every minute for testing
-    },
-}
 
 # Automatically discover tasks in all installed apps
 app.autodiscover_tasks()
+
+# Schedule periodic tasks
+app.conf.beat_schedule = {
+    # Mark expired items every minute
+    'mark_expired_items_every_minute': {
+        'task': 'products.tasks.mark_expired_bakery_items',
+        'schedule': crontab(minute='*/1'),
+    },
+
+    # Optionally, remove expired items (if needed automatically)
+    # Commented out since you want admin to approve manually
+    # 'delete_expired_items_on_admin_approval': {
+    #     'task': 'products.tasks.delete_expired_items_on_admin_approval',
+    #     'schedule': crontab(minute='*/10'),
+    # },
+}
 
 @app.task(bind=True)
 def debug_task(self):

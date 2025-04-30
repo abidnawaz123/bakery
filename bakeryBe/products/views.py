@@ -4,5 +4,8 @@ from .serializers import BakerySerializer
 from .models import *
 
 class BakeryView(ListAPIView):
-    queryset = Bakery.objects.all()
     serializer_class = BakerySerializer
+
+    def get_queryset(self):
+        # Return only active items
+        return Bakery.objects.filter(status='active')
