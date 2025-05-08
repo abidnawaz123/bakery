@@ -3,11 +3,14 @@ import "./App.css";
 import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import axios from "axios";
 import { FaShoppingCart, FaFacebook, FaInstagram, FaEnvelope } from "react-icons/fa"; // More icons
+import MainContainer from "./HeroSection/MainContainer";
+import CartContainer from "./HeroSection/CartContainer";
 
 function App() {
   const [bakeryItems, setBakeryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
 
   const fetchBakeryItems = () => {
     axios
@@ -34,6 +37,19 @@ function App() {
   if (loading) return <div className="skeleton-loader large"></div>;
   if (error) return <div>{error}</div>;
 
+
+  const handleAddToCart = (product) => {
+    console.log('trigged ??')
+    console.log("add to cart product is ==>", product)
+    debugger
+    if (cartItems.length) {
+      if (cartItems.findIndex(item => item.id == product.id) == -1) {
+        setCartItems(prevItems => [...prevItems, product])
+      }
+    }
+  }
+
+  console.log('cartItems', cartItems.length)
   return (
     <div className="website-container">
       <header className="custom-header">
@@ -48,49 +64,15 @@ function App() {
           <div className="header-actions">
             {/* <button className="search-button">Search</button> */}
             <button className="cart-icon-button">
-              <FaShoppingCart className="cart-icon" /> Cart (0)
+              <FaShoppingCart className="cart-icon" /> Cart ({cartItems.length})
             </button>
           </div>
         </div>
       </header>
 
       <div className="background-container">
-        <Container>
-          <div className="content-container">
-            <h1>Delicious Bakery Products</h1>
-            <h2 className="subheading">Freshly Baked Goods Made with Love</h2>
-            <p className="introduction">
-              Welcome to our online bakery! We offer a delightful selection of handcrafted breads, pastries, and treats made with the finest ingredients. Browse our fresh items below and satisfy your cravings.
-            </p>
-            <div className="card-grid">
-              {bakeryItems.map((product) => (
-                <Card key={product.id} className="product-card">
-                  <div className="image-container">
-                    <Card.Img
-                      variant="top"
-                      src={product.item_image}
-                      alt={product.item_name}
-                      className="product-image"
-                    />
-                  </div>
-                  <Card.Body className="product-info">
-                    <Card.Title className="product-name">{product.item_name}</Card.Title>
-                    <Card.Text className="product-description">{product.item_description}</Card.Text>
-                    <Card.Text className="product-price">
-                      ${product.item_price.toFixed(2)}
-                    </Card.Text>
-                    <Card.Text className="product-expiry">
-                      Expires on: {new Date(product.expiry_date).toLocaleDateString()}
-                    </Card.Text>
-                    <Button className="add-to-cart-button">
-                      <FaShoppingCart className="cart-icon" /> Add to Cart
-                    </Button>
-                  </Card.Body>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </Container>
+        <MainContainer bakeryItems={bakeryItems} handleAddToCart={handleAddToCart} />
+        {/* <CartContainer /> */}
       </div>
 
       <footer className="custom-footer">
