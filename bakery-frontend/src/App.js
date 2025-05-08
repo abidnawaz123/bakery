@@ -4,13 +4,19 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 import axios from "axios";
 import { FaShoppingCart, FaFacebook, FaInstagram, FaEnvelope } from "react-icons/fa"; // More icons
 import MainContainer from "./HeroSection/MainContainer";
+import { ToastContainer, toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import CartItems from "./CartSection/CartSection";
 import CartContainer from "./HeroSection/CartContainer";
+
 
 function App() {
   const [bakeryItems, setBakeryItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [showCartSection, setShowCartSection] = useState(false);
+
 
   const fetchBakeryItems = () => {
     axios
@@ -39,17 +45,18 @@ function App() {
 
 
   const handleAddToCart = (product) => {
-    console.log('trigged ??')
-    console.log("add to cart product is ==>", product)
-    debugger
-    if (cartItems.length) {
+    if (product) {
       if (cartItems.findIndex(item => item.id == product.id) == -1) {
         setCartItems(prevItems => [...prevItems, product])
+      } else {
+        toast.error(<div>Item <b>{product?.item_name}</b> has already been added to the cart</div>)
       }
     }
   }
 
-  console.log('cartItems', cartItems.length)
+  console.log('cart items =>', cartItems);
+
+
   return (
     <div className="website-container">
       <header className="custom-header">
@@ -63,16 +70,23 @@ function App() {
           </nav>
           <div className="header-actions">
             {/* <button className="search-button">Search</button> */}
-            <button className="cart-icon-button">
-              <FaShoppingCart className="cart-icon" /> Cart ({cartItems.length})
+            <button className="cart-icon-button"
+              onClick={() => setShowCartSection(prevState => !prevState)}>
+              <FaShoppingCart className="cart-icon" /> {!showCartSection ? `Cart (${cartItems.length})` : `Go to bakery`}
             </button>
           </div>
         </div>
       </header>
 
       <div className="background-container">
-        <MainContainer bakeryItems={bakeryItems} handleAddToCart={handleAddToCart} />
-        {/* <CartContainer /> */}
+        {
+          showCartSection ? (
+            <CartContainer bakeryItems={cartItems} />
+          ) :
+            (
+              <MainContainer bakeryItems={bakeryItems} handleAddToCart={handleAddToCart} />
+            )
+        }
       </div>
 
       <footer className="custom-footer">
@@ -97,6 +111,9 @@ function App() {
         </div>
         <div className="footer-bottom">
           <p>&copy; {new Date().getFullYear()} Our Sweet Bakery. All rights reserved.</p>
+        </div>
+        <div style={{ padding: 20 }}>
+          <ToastContainer draggable limit={3} autoClose={1000} />
         </div>
       </footer>
     </div>
